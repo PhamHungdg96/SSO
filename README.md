@@ -18,14 +18,9 @@ $ cd ../
 
 $ docker-compose up
 
-------- SSO
-    |
-    |------- data: cert, keystore for keycloak, haproxy
-    |
-    |------- database: the folder mount to /var/lib/postgresql/data in postgres container (root permission)
-    |
-    |------- haproxy: to build docker image
-    |
-    |------- keycloak: to build docker image
-    |
-    |------- log: the folder mount to /var/log/keycloak/* in keycloak's containers. Ex: keycloak-server.log for main server, keycloak-server-1.log for load balancing server
+├── SSO
+│   ├── data: cert, keystore for keycloak, haproxy
+│   ├── database: the folder mount to /var/lib/postgresql/data in postgres container (root permission)
+│   ├── haproxy: to build docker image
+│   ├── keycloak: to build docker image
+│   └── log: the folder mount to /var/log/keycloak/* in keycloak's containers. Ex: keycloak-server.log for main server, keycloak-server-1.log for load balancing server
