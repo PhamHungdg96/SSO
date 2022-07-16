@@ -1,0 +1,7 @@
+database/*
+ha.ex
+example
+kc.sh
+keycloak.conf.sh
+log/keycloak/*
+keycloak-18.0.2.tar.gz

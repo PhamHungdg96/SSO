@@ -2,72 +2,91 @@ version: '3'
 networks:
   keycloak_network:
     driver: bridge
+    ipam:
+     config:
+        - subnet: 172.29.0.0/16
 services:
   postgres:
     image: postgres
+    container_name: keycloak-database
     networks:
-      - keycloak_network
+      # - keycloak_network
+      keycloak_network:
+        ipv4_address: 172.29.0.2
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     volumes: 
       - db:/var/lib/postgresql/data
+################***keycloak-server***######################
   keycloak-server:
-    image: quay.io/keycloak/keycloak:legacy
+    image: pam/keycloak
     container_name: keycloak-server
     depends_on:
       - postgres
     # ports:
-    #   - 8080:8080
-    environment:
-      DB_VENDOR: POSTGRES
-      DB_ADDR: postgres
-      DB_DATABASE: keycloak
-      DB_USER: postgres
-      DB_SCHEMA: public
-      DB_PASSWORD: password
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: admin
+    #   # - 8080:8080
+    #   - 8443:8443
+    env_file:
+      - .env
+    extra_hosts:
+      - "postgres:172.29.0.2"
+    entrypoint: /opt/keycloak/bin/kc.sh start > /var/log/keycloak/keycloak-server.log
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 30s
       timeout: 10s
       retries: 5
+    volumes:
+      - ./data:/data:rw
+      - kcl:/var/log/keycloak
     networks:
-      - keycloak_network
+      keycloak_network:
+        ipv4_address: 172.29.0.3
+
+################***keycloak-server-1***######################
   keycloak-server-1:
-    image: quay.io/keycloak/keycloak:legacy
+    image: pam/keycloak
     container_name: keycloak-server-1
     depends_on:
       - postgres
     # ports:
-    #   - 8080:8080
-    environment:
-      DB_VENDOR: POSTGRES
-      DB_ADDR: postgres
-      DB_DATABASE: keycloak
-      DB_USER: postgres
-      DB_SCHEMA: public
-      DB_PASSWORD: password
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: admin
+    #   # - 8080:8080
+    #   - 8443:8443
+    env_file:
+      - .env
+    extra_hosts:
+      - "postgres:172.29.0.2"
+    entrypoint: /opt/keycloak/bin/kc.sh start > /var/log/keycloak/keycloak-server-1.log
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 30s
       timeout: 10s
       retries: 5
+    volumes:
+      - ./data:/data:rw
+      - kcl:/var/log/keycloak
     networks:
-      - keycloak_network
+      keycloak_network:
+        ipv4_address: 172.29.0.4
+################***haproxy***######################
   haproxy:
-    image: keycloak-haproxy
+    image: pam/haproxy
     ports:
-      - 80:80
+      - 8443:8443
     depends_on:
       - keycloak-server
-      - keycloak-server-1
+      # - keycloak-server-1
+    extra_hosts:
+      - "keycloak-server:172.29.0.3"
+      - "keycloak-server-1:172.29.0.4"
+    volumes:
+      - ./data:/data:rw
     networks:
-      - keycloak_network
+      keycloak_network:
+        ipv4_address: 172.29.0.5
+################***nginx-proxy***######################
   # nginx-proxy:
   #   image: nginx:alpine
   #   volumes:
@@ -80,3 +99,13 @@ services:
 volumes:
   db:
     driver: local
+    driver_opts:
+        type: ext4
+        o: bind
+        device: /home/atm/project/SSO/database
+  kcl:
+    driver: local
+    driver_opts:
+        type: ext4
+        o: bind
+        device: /home/atm/project/SSO/log/keycloak
