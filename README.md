@@ -33,11 +33,11 @@ $ docker-compose up
 
 - keytool generate: 
 
-$keytool -genkeypair -alias keycloak.com -keyalg RSA -keysize 2048 -validity 3650 -keystore server.keystore -dname "cn=KeyCloak,o=Org,c=AU" -storetype PKCS12 -storepass KEYSTOREPASSWORD
+$ keytool -genkeypair -alias keycloak.com -keyalg RSA -keysize 2048 -validity 3650 -keystore server.keystore -dname "cn=KeyCloak,o=Org,c=AU" -storetype PKCS12 -storepass KEYSTOREPASSWORD
 
 - openssl for certificate:
 
-$openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
+$ openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
 
 - certificate for haproxy
 
