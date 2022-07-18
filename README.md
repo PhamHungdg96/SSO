@@ -29,3 +29,16 @@ $ docker-compose up
 │   ├── keycloak: to build docker image
 
 │   └── log: the folder mount to /var/log/keycloak/* in keycloak's containers. Ex: keycloak-server.log for main server, keycloak-server-1.log for load balancing server
+
+
+- keytool generate: 
+
+$keytool -genkeypair -alias keycloak.com -keyalg RSA -keysize 2048 -validity 3650 -keystore server.keystore -dname "cn=KeyCloak,o=Org,c=AU" -storetype PKCS12 -storepass KEYSTOREPASSWORD
+
+- openssl for certificate:
+
+$openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
+
+- certificate for haproxy
+
+$ cat cert.pem key.pem > haproxy.pem
